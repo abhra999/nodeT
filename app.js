@@ -1,15 +1,15 @@
 const app=require('express')();
 
-app.use(log);
-
-app.get('/',(req,res)=>{
+app.get('/',(req,res,next)=>{
     console.log('user');
+    next();
 })
 
+app.use(log);
+
 function log(req,res,next){
-    console.log('before');
+    console.log('log');
     next();
-    console.log('after');
 }
 
 app.listen(3000);
