@@ -9,28 +9,24 @@ const transports = {
     file:  new winston.transports.File({filename: 'error.log',level: 'error'}),
   };
 
-const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
-  format: combine(
-    colorize({ all: true }),
-    timestamp({
-      format: 'YYYY-MM-DD hh:mm:ss.SSS A',
-    }),
-    align(),
-    printf((info) => `[${info.timestamp}] ${info.level}: ${info.message}`)
-  ),
-  transports: [
-    transports.console,
-    transports.file
-  ],
-});
+  winston.loggers.add('WriteLogger', {
+    level:'error',
+    file:'error.log',
+    format: winston.format.json(),
+    transports: [transports.file],
+  });
+  winston.loggers.add('ConsoleLogger', {
+    format: winston.format.json(),
+    transports: [transports.console],
+  });
 
+  const writeLogger = winston.loggers.get('WriteLogger');
+  const consoleLogger = winston.loggers.get('ConsoleLogger');
 
 app.get('/',(req,res,next)=>{
 
-    logger.info('Info message');
-    logger.error('Error message');
-    logger.warn('Warning message');
+    consoleLogger.info('Info message');
+    writeLogger.error('Error message');
 
     res.send(`user admin ${req.admin}`);
     
