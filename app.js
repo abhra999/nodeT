@@ -1,27 +1,34 @@
 const app=require('express')();
+const winston = require('winston');
+require('dotenv').config();
 
-app.use(auth);
+const logger = winston.createLogger({
+    transports: [
+        new winston.transports.File({
+            filename: 'error.log',
+            level: 'error',
+            format: winston.format.json()
+          }),        
+        ]
+  });
 
-app.get('/',auth,(req,res,next)=>{
+  if (process.env.NODE_ENV === 'development') {
+    logger.add(new winston.transports.Console({
+      format: winston.format.simple(),
+    }));
+  }
+
+
+app.get('/',(req,res,next)=>{
+    if(!req.admin){
+        logger.log({
+            level: 'error',
+            message: 'admin not found'
+          });
+         
+    }
     res.send(`user admin ${req.admin}`);
+    
     next();
 })
-
-app.use(log);
-
-function auth(req,res,next){
-    if(req.query.admin=='true'){
-       req.admin=true; 
-       next();
-       return;
-    }
-    res.send('No Auth');
-
-}
-
-function log(req,res,next){
-    console.log('log');
-    next();
-}
-
 app.listen(3000);
